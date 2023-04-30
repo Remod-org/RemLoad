@@ -73,3 +73,8 @@ Note that currently for auth we call out to a hook, which should only exist in R
 
 This returns a basic auth string, base64-encoded so that it can be used by the HttpWebRequest that downloads the plugin.
 
+## Caveat(s)
+
+  1. You should definitely use https.
+
+  2. Your Rust server must be able to trust the SSL/TLS cert used, so no self-signed certs.
