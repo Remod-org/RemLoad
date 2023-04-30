@@ -18,7 +18,7 @@
 If you can make this better, please do.  But, let me know what you've done so it can be improved for everyone.  By nature of the licensing, sharing of the code is required on request.  Please make it available anyway.
 
 ## Configuration
-
+```json
 {
   "Options": {
     "Provider": "remod",
@@ -32,6 +32,7 @@ If you can make this better, please do.  But, let me know what you've done so it
     "Patch": 1
   }
 }
+```
 
 ## Basic how-to
   1. Setup a private folder on your site (Apache used here as an example.
