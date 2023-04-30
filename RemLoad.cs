@@ -102,7 +102,10 @@ namespace Oxide.Plugins
                     HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(directory + name);
                     httpRequest.Method = WebRequestMethods.Http.Get;
                     string encoded = (string)Interface.Oxide.CallHook("RemLoadGetAuthString", name);
-                    httpRequest.Headers.Add("Authorization", "Basic " + encoded);
+                    if (!string.IsNullOrEmpty(encoded))
+                    {
+                        httpRequest.Headers.Add("Authorization", "Basic " + encoded);
+                    }
                     HttpWebResponse httpResponse = (HttpWebResponse)httpRequest.GetResponse();
                     Stream httpResponseStream = httpResponse.GetResponseStream();
                     const int bufferSize = 1024;
