@@ -51,7 +51,7 @@ using System.Net;
 namespace Oxide.Plugins
 {
     [Info("RemLoad", "RFC1920", "1.0.1")]
-    [Description("")]
+    [Description("A remote plugin loader for Rust Oxide")]
     internal class RemLoad : RustPlugin
     {
         HarmonyInstance _harmony;
