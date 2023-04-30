@@ -64,3 +64,12 @@ Note that this could be used with multiple "providers," but would require that t
 
 These providers could also simply point to folders with each protected plugin, one per folder, etc.
 
+
+Note that currently for auth we call out to a hook, which should only exist in RemLoad:
+
+```cs
+    private string RemLoadGetAuthString(string pluginName)
+```
+
+This returns a basic auth string, base64-encoded so that it can be used by the HttpWebRequest that downloads the plugin.
+
