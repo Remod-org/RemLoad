@@ -49,4 +49,18 @@ Allow from all
 ```
   3. Ensure that you create the AuthUserFile in the right location (not in your web tree, please).
 
+  4. Add plugin files to the folder.
+
+
+Note that this could be used with multiple "providers," but would require that those be added to the code:
+
+```cs
+    private Dictionary<string, string> sites = new Dictionary<string, string>()
+    {
+        { "remod", "https://code.remod.org/private/" },
+        { "yours", "https://yoursitehere/private/" }
+    };
+```
+
+These providers could also simply point to folders with each protected plugin, one per folder, etc.
 
