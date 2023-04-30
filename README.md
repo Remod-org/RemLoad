@@ -1,7 +1,7 @@
 # RemLoad - A remote plugin loader for Rust Oxide
 
 ### What is this?
- *  RemLoad is a Harmony mod that patches into the CSharpPluginLoader to detect and intercept files when called
+ *  RemLoad is a Harmony mod plugin that patches into the CSharpPluginLoader to detect and intercept files when called
  *  with http(s) in the directory name.  This is just a proof of concept, but is usable.
 
 ### What it does:
