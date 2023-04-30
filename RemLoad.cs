@@ -132,9 +132,10 @@ namespace Oxide.Plugins
             cp.Loader.Load(url, plug);
         }
 
-        private Dictionary<string, string> sites = new Dictionary<string, string>()
+        private readonly Dictionary<string, string> sites = new Dictionary<string, string>()
         {
-            { "remod", "https://code.remod.org/private/" }
+            { "remod", "https://code.remod.org/private/" },
+            { "yours", "https://yoursitehere/private/" }
         };
 
         private string RemLoadGetAuthString(string pluginName)
