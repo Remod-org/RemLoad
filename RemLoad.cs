@@ -24,9 +24,10 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
-using Harmony;
+using HarmonyLib;
 using System.IO;
 using System.Net;
+using Oxide.Core.Plugins;
 //Reference: 0Harmony
 
 /*
@@ -50,12 +51,10 @@ using System.Net;
  */
 namespace Oxide.Plugins
 {
-    [Info("RemLoad", "RFC1920", "1.0.1")]
+    [Info("RemLoad", "RFC1920", "1.0.2")]
     [Description("A remote plugin loader for Rust Oxide")]
     internal class RemLoad : RustPlugin
     {
-        HarmonyInstance _harmony;
-
         private ConfigData configData;
         public static RemLoad Instance;
 
@@ -83,13 +82,9 @@ namespace Oxide.Plugins
 
             AddCovalenceCommand("rload", "RemoteLoad");
             Instance = this;
-
-            _harmony = HarmonyInstance.Create(Name + "PATCH");
-            Type patchType = AccessTools.Inner(typeof(RemLoad), "CSharpPluginLoaderPatch");
-            new PatchProcessor(_harmony, patchType, HarmonyMethod.Merge(patchType.GetHarmonyMethods())).Patch();
-            Puts($"Applied Patch: {patchType.Name}");
         }
 
+        [AutoPatch]
         [HarmonyPatch(typeof(CSharpPluginLoader), nameof(CSharpPluginLoader.Load), new Type[] { typeof(string), typeof(string) })]
         public static class CSharpPluginLoaderPatch
         {
@@ -98,10 +93,10 @@ namespace Oxide.Plugins
             {
                 if (directory.StartsWith("http"))
                 {
-                    Interface.Oxide.LogDebug($"Trying to load remote plugin from {directory}{name}");
+                    Interface.GetMod().LogDebug($"Trying to load remote plugin from {directory}{name}");
                     HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(directory + name);
                     httpRequest.Method = WebRequestMethods.Http.Get;
-                    string encoded = (string)Interface.Oxide.CallHook("RemLoadGetAuthString", name);
+                    string encoded = (string)Interface.GetMod().CallHook("RemLoadGetAuthString", name);
                     if (!string.IsNullOrEmpty(encoded))
                     {
                         httpRequest.Headers.Add("Authorization", "Basic " + encoded);
@@ -111,7 +106,7 @@ namespace Oxide.Plugins
                     const int bufferSize = 1024;
                     byte[] buffer = new byte[bufferSize];
 
-                    FileStream fileStream = File.OpenWrite(Path.Combine(Interface.Oxide.PluginDirectory, name));
+                    FileStream fileStream = File.OpenWrite(Path.Combine(Interface.GetMod().PluginDirectory, name));
                     int bytesRead;
                     while ((bytesRead = httpResponseStream.Read(buffer, 0, bufferSize)) != 0)
                     {
@@ -126,7 +121,7 @@ namespace Oxide.Plugins
         private void RemoteLoad(IPlayer player, string command, string[] args)
         {
             string url = sites[configData.Options.Provider];
-            string plug = "Tides.cs";
+            const string plug = "Tides.cs";
 
             CompilablePlugin cp = CSharpPluginLoader.GetCompilablePlugin(url, plug);
             cp.Loader.Load(url, plug);
@@ -141,22 +136,21 @@ namespace Oxide.Plugins
         private string RemLoadGetAuthString(string pluginName)
         {
             loadedPlugins.Add(pluginName);
-            string auth = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(configData.Options.Username + ":" + configData.Options.Key));
+
             //DoLog($"Returning auth string for {pluginName}: '{auth}'");
-            return auth;
+            return Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(configData.Options.Username + ":" + configData.Options.Key));
         }
 
         private void DoLog(string message)
         {
-            if (configData.debug) Interface.Oxide.LogInfo(message);
+            if (configData.debug) Interface.GetMod().LogInfo(message);
         }
 
         private void Unload()
         {
-            _harmony.UnpatchAll(Name + "PATCH");
             foreach (string pluginName in loadedPlugins)
             {
-                File.Delete(Path.Combine(Interface.Oxide.PluginDirectory, pluginName));
+                File.Delete(Path.Combine(Interface.GetMod().PluginDirectory, pluginName));
             }
         }
 
@@ -193,12 +187,14 @@ namespace Oxide.Plugins
         protected override void LoadDefaultConfig()
         {
             Puts("Creating new config file.");
-            ConfigData config = new ConfigData();
-            config.Options = new Options()
+            ConfigData config = new ConfigData
             {
-                Provider = "remod",
-                Username = "remload",
-                Key = "FAKEKEY"
+                Options = new Options()
+                {
+                    Provider = "remod",
+                    Username = "remload",
+                    Key = "FAKEKEY"
+                }
             };
 
             SaveConfig(config);
